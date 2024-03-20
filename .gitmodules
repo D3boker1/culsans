@@ -12,4 +12,4 @@
 	url = git@github.com:planvtech/axi_llc.git
 [submodule "cva6-sdk"]
 	path = cva6-sdk
-	url = git@github.com:planvtech/cva6-sdk.git
+	url = git@github.com:alsaqr-platform/cva6-sdk.git
