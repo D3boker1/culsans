@@ -166,20 +166,35 @@ module culsans_peripherals #(
     `REG_BUS_ASSIGN_TO_REQ(plic_req, reg_bus)
     `REG_BUS_ASSIGN_FROM_RSP(reg_bus, plic_rsp)
 
-    plic_top #(
-      .N_SOURCE    ( culsans_pkg::NumSources  ),
-      .N_TARGET    ( culsans_pkg::NumTargets  ),
-      .MAX_PRIO    ( culsans_pkg::MaxPriority ),
-      .reg_req_t   ( plic_req_t              ),
-      .reg_rsp_t   ( plic_rsp_t              )
-    ) i_plic (
-      .clk_i,
-      .rst_ni,
-      .req_i         ( plic_req    ),
-      .resp_o        ( plic_rsp    ),
-      .le_i          ( '0          ), // 0:level 1:edge
-      .irq_sources_i ( irq_sources ),
-      .eip_targets_o ( irq_o       )
+    // plic_top #(
+    //   .N_SOURCE    ( culsans_pkg::NumSources  ),
+    //   .N_TARGET    ( culsans_pkg::NumTargets  ),
+    //   .MAX_PRIO    ( culsans_pkg::MaxPriority ),
+    //   .reg_req_t   ( plic_req_t              ),
+    //   .reg_rsp_t   ( plic_rsp_t              )
+    // ) i_plic (
+    //   .clk_i,
+    //   .rst_ni,
+    //   .req_i         ( plic_req    ),
+    //   .resp_o        ( plic_rsp    ),
+    //   .le_i          ( '0          ), // 0:level 1:edge
+    //   .irq_sources_i ( irq_sources ),
+    //   .eip_targets_o ( irq_o       )
+    // );
+
+    aplic_top #(
+      .NR_SRC     ( culsans_pkg::NumSources   ),    
+      .MIN_PRIO   ( culsans_pkg::MaxPriority  ),      
+      .NR_IDCs    ( culsans_pkg::NB_CORES     ),      
+      .reg_req_t  ( plic_req_t                ),        
+      .reg_rsp_t  ( plic_rsp_t                )          
+    ) i_aplic (
+      .i_clk          ( clk_i                       ),
+      .ni_rst         ( rst_ni                      ),
+      .i_irq_sources  ( {irq_sources, 1'b0}         ),       
+      .i_req_cfg      ( plic_req                    ),
+      .o_resp_cfg     ( plic_rsp                    ),
+      .o_Xeip_targets ( irq_o                       )   
     );
 
     // ---------------

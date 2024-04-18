@@ -243,7 +243,17 @@ dm::dmi_resp_t debug_resp;
 logic dmactive;
 
 // IRQ
-logic [culsans_pkg::NumTargets-1:0] irq;
+logic [culsans_pkg::NB_CORES-1:0][ariane_soc::NrIntpFiles-1:0]                               irq               ;
+logic [culsans_pkg::NB_CORES-1:0][1:0]                                                       imsic_priv_lvl    ;
+logic [culsans_pkg::NB_CORES-1:0][ariane_soc::NrVSIntpFilesW:0]                              imsic_vgein       ;
+logic [culsans_pkg::NB_CORES-1:0][32-1:0]                                                    imsic_addr        ;
+logic [culsans_pkg::NB_CORES-1:0][32-1:0]                                                    imsic_data_i      ;
+logic [culsans_pkg::NB_CORES-1:0]                                                            imsic_we          ;
+logic [culsans_pkg::NB_CORES-1:0]                                                            imsic_claim       ;
+logic [culsans_pkg::NB_CORES-1:0][32-1:0]                                                    imsic_data_o      ;
+logic [culsans_pkg::NB_CORES-1:0]                                                            imsic_exception   ;
+logic [culsans_pkg::NB_CORES-1:0][ariane_soc::NrIntpFiles-1:0][ariane_soc::NrSourcesW-1:0]   imsic_xtopei      ;
+
 assign test_en    = 1'b0;
 
 logic [culsans_pkg::NrSlaves-1:0] pc_asserted;
@@ -273,6 +283,7 @@ assign addr_map = '{
   '{ idx: culsans_pkg::UART,     start_addr: culsans_pkg::UARTBase,     end_addr: culsans_pkg::UARTBase + culsans_pkg::UARTLength         },
   '{ idx: culsans_pkg::Timer,    start_addr: culsans_pkg::TimerBase,    end_addr: culsans_pkg::TimerBase + culsans_pkg::TimerLength       },
   '{ idx: culsans_pkg::SPI,      start_addr: culsans_pkg::SPIBase,      end_addr: culsans_pkg::SPIBase + culsans_pkg::SPILength           },
+  '{ idx: culsans_pkg::IMSIC,    start_addr: culsans_pkg::IMSICBase,    end_addr: culsans_pkg::IMSICBase + culsans_pkg::IMSICLength       },
   '{ idx: culsans_pkg::Ethernet, start_addr: culsans_pkg::EthernetBase, end_addr: culsans_pkg::EthernetBase + culsans_pkg::EthernetLength },
   '{ idx: culsans_pkg::GPIO,     start_addr: culsans_pkg::GPIOBase,     end_addr: culsans_pkg::GPIOBase + culsans_pkg::GPIOLength         },
   '{ idx: culsans_pkg::DRAM,     start_addr: culsans_pkg::DRAMBase,     end_addr: culsans_pkg::DRAMBase + culsans_pkg::DRAMLength+32'h1000         }
@@ -739,7 +750,16 @@ end
       .rst_ni               ( ndmreset_n          ),
       .boot_addr_i          ( culsans_pkg::ROMBase ),
       .hart_id_i            ( {56'h0, hart_id[i]} ),
-      .irq_i                ( irq[2*i+1:2*i]      ),
+      .irq_i                ( irq[i]              ),
+      .imsic_priv_lvl_o     ( imsic_priv_lvl[i]   ),        
+      .imsic_vgein_o        ( imsic_vgein[i]      ),      
+      .imsic_addr_o        ( imsic_addr[i]      ),    
+      .imsic_data_o         ( imsic_data_o[i]     ),    
+      .imsic_we_o           ( imsic_we[i]         ),  
+      .imsic_claim_o        ( imsic_claim[i]      ),      
+      .imsic_data_i         ( imsic_data_i[i]     ),    
+      .imsic_exception_i    ( imsic_exception[i]  ),          
+      .imsic_xtopei_i       ( imsic_xtopei[i]     ),      
       .ipi_i                ( ipi[i]              ),
       .time_irq_i           ( timer_irq[i]        ),
   `ifdef RVFI_PORT
@@ -905,7 +925,17 @@ ariane_peripherals #(
     .eth_clk_i    ( eth_clk                      ),
     .ethernet     ( master[culsans_pkg::Ethernet] ),
     .timer        ( master[culsans_pkg::Timer]    ),
-    .irq_o        ( irq                          ),
+    .imsic        ( master[culsans_pkg::IMSIC]   ),
+    .i_priv_lvl         ( imsic_priv_lvl         ), 
+    .i_vgein            ( imsic_vgein            ),
+    .i_imsic_addr       ( imsic_addr            ),   
+    .i_imsic_data       ( imsic_data_o           ),   
+    .i_imsic_we         ( imsic_we               ), 
+    .i_imsic_claim      ( imsic_claim            ),     
+    .o_imsic_data       ( imsic_data_i           ),   
+    .o_xtopei           ( imsic_xtopei           ),
+    .irq_o              ( irq                    ),     
+    .o_imsic_exception  ( imsic_exception        ), 
     .rx_i         ( rx                           ),
     .tx_o         ( tx                           ),
     .eth_txck,
