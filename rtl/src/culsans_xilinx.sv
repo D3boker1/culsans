@@ -246,11 +246,11 @@ logic dmactive;
 logic [culsans_pkg::NB_CORES-1:0][ariane_soc::NrIntpFiles-1:0]                               irq               ;
 logic [culsans_pkg::NB_CORES-1:0][1:0]                                                       imsic_priv_lvl    ;
 logic [culsans_pkg::NB_CORES-1:0][ariane_soc::NrVSIntpFilesW:0]                              imsic_vgein       ;
-logic [culsans_pkg::NB_CORES-1:0][32-1:0]                                                    imsic_addr        ;
-logic [culsans_pkg::NB_CORES-1:0][32-1:0]                                                    imsic_data_i      ;
+logic [culsans_pkg::NB_CORES-1:0][31:0]                                                      imsic_addr        ;
+logic [culsans_pkg::NB_CORES-1:0][riscv::XLEN-1:0]                                           imsic_data_i      ;
 logic [culsans_pkg::NB_CORES-1:0]                                                            imsic_we          ;
 logic [culsans_pkg::NB_CORES-1:0]                                                            imsic_claim       ;
-logic [culsans_pkg::NB_CORES-1:0][32-1:0]                                                    imsic_data_o      ;
+logic [culsans_pkg::NB_CORES-1:0][riscv::XLEN-1:0]                                           imsic_data_o      ;
 logic [culsans_pkg::NB_CORES-1:0]                                                            imsic_exception   ;
 logic [culsans_pkg::NB_CORES-1:0][ariane_soc::NrIntpFiles-1:0][ariane_soc::NrSourcesW-1:0]   imsic_xtopei      ;
 
@@ -753,7 +753,7 @@ end
       .irq_i                ( irq[i]              ),
       .imsic_priv_lvl_o     ( imsic_priv_lvl[i]   ),        
       .imsic_vgein_o        ( imsic_vgein[i]      ),      
-      .imsic_addr_o        ( imsic_addr[i]      ),    
+      .imsic_addr_o         ( imsic_addr[i]       ),    
       .imsic_data_o         ( imsic_data_o[i]     ),    
       .imsic_we_o           ( imsic_we[i]         ),  
       .imsic_claim_o        ( imsic_claim[i]      ),      
@@ -928,7 +928,7 @@ ariane_peripherals #(
     .imsic        ( master[culsans_pkg::IMSIC]   ),
     .i_priv_lvl         ( imsic_priv_lvl         ), 
     .i_vgein            ( imsic_vgein            ),
-    .i_imsic_addr       ( imsic_addr            ),   
+    .i_imsic_addr       ( imsic_addr             ),   
     .i_imsic_data       ( imsic_data_o           ),   
     .i_imsic_we         ( imsic_we               ), 
     .i_imsic_claim      ( imsic_claim            ),     
